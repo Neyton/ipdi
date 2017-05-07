@@ -1,9 +1,7 @@
 package com.karash.DTO;
 
-public class Address {
+public class Start_address {
     private String lon;
-
-    private String name;
 
     private String lat;
 
@@ -15,14 +13,6 @@ public class Address {
 
     public void setLon(String lon) {
         this.lon = lon;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getLat() {
@@ -43,6 +33,6 @@ public class Address {
 
     @Override
     public String toString() {
-        return "ClassPojo [lon = " + lon + ", name = " + name + ", lat = " + lat + ", location_id = " + location_id + "]";
+        return "ClassPojo [lon = " + lon + ", lat = " + lat + ", location_id = " + location_id + "]";
     }
 }

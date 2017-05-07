@@ -1,71 +1,38 @@
-
 package com.karash.DTO;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({
-    "address",
-    "duration",
-    "time_windows"
-})
 public class Pickup {
+    private Time_windows[] time_windows;
 
-    @JsonProperty("address")
-    private Address_ address;
-    @JsonProperty("duration")
-    private Integer duration;
-    @JsonProperty("time_windows")
-    private List<TimeWindow_> timeWindows = null;
-    @JsonIgnore
-    private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private String duration;
 
-    @JsonProperty("address")
-    public Address_ getAddress() {
-        return address;
+    private Address address;
+
+    public Time_windows[] getTime_windows() {
+        return time_windows;
     }
 
-    @JsonProperty("address")
-    public void setAddress(Address_ address) {
-        this.address = address;
+    public void setTime_windows(Time_windows[] time_windows) {
+        this.time_windows = time_windows;
     }
 
-    @JsonProperty("duration")
-    public Integer getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    @JsonProperty("duration")
-    public void setDuration(Integer duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
     }
 
-    @JsonProperty("time_windows")
-    public List<TimeWindow_> getTimeWindows() {
-        return timeWindows;
+    public Address getAddress() {
+        return address;
     }
 
-    @JsonProperty("time_windows")
-    public void setTimeWindows(List<TimeWindow_> timeWindows) {
-        this.timeWindows = timeWindows;
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
-    @JsonAnyGetter
-    public Map<String, Object> getAdditionalProperties() {
-        return this.additionalProperties;
+    @Override
+    public String toString() {
+        return "ClassPojo [time_windows = " + time_windows + ", duration = " + duration + ", address = " + address + "]";
     }
-
-    @JsonAnySetter
-    public void setAdditionalProperty(String name, Object value) {
-        this.additionalProperties.put(name, value);
-    }
-
 }

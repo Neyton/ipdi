@@ -1,15 +1,26 @@
 package com.karash.controllers;
 
+import com.karash.DTO.ProblemDTO;
+import com.karash.services.ProblemService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by Neyton on 05.2017.
  */
 
-@RestController
+@Controller
 @RequestMapping("/api")
 public class MainController {
 
+    @Autowired
+    private ProblemService problemService;
 
+    @PostMapping
+    public Object getData(@RequestBody ProblemDTO pojo) {
+        return this.problemService.getSolution(pojo);
+    }
 }
