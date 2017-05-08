@@ -1,62 +1,40 @@
 package com.karash.services;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
-import com.graphhopper.jsprit.core.algorithm.box.GreedySchrimpfFactory;
-import com.graphhopper.jsprit.core.algorithm.termination.IterationWithoutImprovementTermination;
-import com.graphhopper.jsprit.core.problem.Location;
+import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.selector.SelectBest;
+import com.graphhopper.jsprit.core.analysis.SolutionAnalyser;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
-import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
-import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
-import com.graphhopper.jsprit.core.util.FastVehicleRoutingTransportCostsMatrix;
-import com.graphhopper.jsprit.core.util.Solutions;
-import com.karash.DTO.ProblemDTO;
-import org.springframework.stereotype.Service;
+import com.graphhopper.jsprit.io.problem.VrpXMLReader;
+import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collection;
 
-@Service
+@org.springframework.stereotype.Service
 public class ProblemServiceImpl implements ProblemService {
 
     @Override
-    public VehicleRoutingProblemSolution getSolution(ProblemDTO pojo) {
-        VehicleTypeImpl.Builder typeBuilder = VehicleTypeImpl.Builder.newInstance("vehicle-type").addCapacityDimension(0, 23);
-        typeBuilder.setCostPerDistance(1.0);
+    public VehicleRoutingProblemSolution getSolution(String pojo) {
+        JSONObject jsonObject = new JSONObject(pojo);
 
-        VehicleTypeImpl bigType = typeBuilder.build();
-
-        VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle");
-        vehicleBuilder.setStartLocation(Location.Builder.newInstance().setIndex(1).build());
-        vehicleBuilder.setType(bigType);
-        VehicleImpl bigVehicle = vehicleBuilder.build();
-
-		/*
-         * start building the problem
-		 */
         VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-        vrpBuilder.setFleetSize(VehicleRoutingProblem.FleetSize.INFINITE);
-        vrpBuilder.addVehicle(bigVehicle);
-
-		/*
-         * read demand quantities
-		 */
-//        readDemandQuantities(vrpBuilder);
-
-		/*
-         * create cost-matrix
-		 */
-        FastVehicleRoutingTransportCostsMatrix.Builder matrixBuilder = FastVehicleRoutingTransportCostsMatrix.Builder.newInstance(11, true);
-//        readDistances(matrixBuilder);
-
-        vrpBuilder.setRoutingCost(matrixBuilder.build());
-
-        VehicleRoutingProblem vrp = vrpBuilder.build();
-
-        VehicleRoutingAlgorithm vra = new GreedySchrimpfFactory().createAlgorithm(vrp);
-        vra.setPrematureAlgorithmTermination(new IterationWithoutImprovementTermination(100));
+        System.out.println(org.json.XML.toString(jsonObject));
+        new VrpXMLReader(vrpBuilder).read(new ByteArrayInputStream(org.json.XML.toString(jsonObject).getBytes()));
+        final VehicleRoutingProblem vrp = vrpBuilder.build();
+        VehicleRoutingAlgorithm vra = Jsprit.createAlgorithm(vrp);
         Collection<VehicleRoutingProblemSolution> solutions = vra.searchSolutions();
+        VehicleRoutingProblemSolution solution = new SelectBest().selectSolution(solutions);
+        SolutionAnalyser analyser = new SolutionAnalyser(vrp, solution, (from, to, departureTime, vehicle) -> vrp.getTransportCosts().getTransportCost(from, to, 0., null, null));
 
-        return Solutions.bestOf(solutions);
+        System.out.println("tp_distance: " + analyser.getDistance());
+        System.out.println("tp_time: " + analyser.getTransportTime());
+        System.out.println("waiting: " + analyser.getWaitingTime());
+        System.out.println("service: " + analyser.getServiceTime());
+        System.out.println("#picks: " + analyser.getNumberOfPickups());
+        System.out.println("#deliveries: " + analyser.getNumberOfDeliveries());
+        return null;
     }
 
 

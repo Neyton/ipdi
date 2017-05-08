@@ -1,6 +1,5 @@
 package com.karash.controllers;
 
-import com.karash.DTO.ProblemDTO;
 import com.karash.services.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,7 +19,7 @@ public class MainController {
     private ProblemService problemService;
 
     @PostMapping
-    public Object getData(@RequestBody ProblemDTO pojo) {
-        return this.problemService.getSolution(pojo);
+    public Object getData(@RequestBody String data) {
+        return this.problemService.getSolution(data);
     }
 }
