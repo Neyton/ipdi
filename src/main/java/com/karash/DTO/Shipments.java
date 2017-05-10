@@ -2,18 +2,12 @@ package com.karash.DTO;
 
 public class Shipments {
     private String id;
-
-    private String[] required_skills;
-
+    private String[] requiredSkills;
     private Pickup pickup;
-
-    private String[] allowed_vehicles;
-
+    private String[] allowedVehicles;
     private String name;
-
     private Delivery delivery;
-
-    private String[] size;
+    private Integer[] size;
 
     public String getId() {
         return id;
@@ -23,12 +17,12 @@ public class Shipments {
         this.id = id;
     }
 
-    public String[] getRequired_skills() {
-        return required_skills;
+    public String[] getRequiredSkills() {
+        return requiredSkills;
     }
 
-    public void setRequired_skills(String[] required_skills) {
-        this.required_skills = required_skills;
+    public void setRequiredSkills(String[] requiredSkills) {
+        this.requiredSkills = requiredSkills;
     }
 
     public Pickup getPickup() {
@@ -39,12 +33,12 @@ public class Shipments {
         this.pickup = pickup;
     }
 
-    public String[] getAllowed_vehicles() {
-        return allowed_vehicles;
+    public String[] getAllowedVehicles() {
+        return allowedVehicles;
     }
 
-    public void setAllowed_vehicles(String[] allowed_vehicles) {
-        this.allowed_vehicles = allowed_vehicles;
+    public void setAllowedVehicles(String[] allowedVehicles) {
+        this.allowedVehicles = allowedVehicles;
     }
 
     public String getName() {
@@ -63,16 +57,16 @@ public class Shipments {
         this.delivery = delivery;
     }
 
-    public String[] getSize() {
+    public Integer[] getSize() {
         return size;
     }
 
-    public void setSize(String[] size) {
+    public void setSize(Integer[] size) {
         this.size = size;
     }
 
     @Override
     public String toString() {
-        return "ClassPojo [id = " + id + ", required_skills = " + required_skills + ", pickup = " + pickup + ", allowed_vehicles = " + allowed_vehicles + ", name = " + name + ", delivery = " + delivery + ", size = " + size + "]";
+        return "ClassPojo [id = " + id + ", requiredSkills = " + requiredSkills + ", pickup = " + pickup + ", allowedVehicles = " + allowedVehicles + ", name = " + name + ", delivery = " + delivery + ", size = " + size + "]";
     }
 }
