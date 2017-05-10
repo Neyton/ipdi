@@ -1,6 +1,6 @@
 package com.karash.DTO;
 
-public class Time_windows {
+public class TimeWindows {
     private String earliest;
 
     private String latest;

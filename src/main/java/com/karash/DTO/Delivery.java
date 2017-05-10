@@ -1,17 +1,17 @@
 package com.karash.DTO;
 
 public class Delivery {
-    private Time_windows[] time_windows;
+    private TimeWindows[] time_windows;
 
     private String duration;
 
     private Address address;
 
-    public Time_windows[] getTime_windows() {
+    public TimeWindows[] getTime_windows() {
         return time_windows;
     }
 
-    public void setTime_windows(Time_windows[] time_windows) {
+    public void setTime_windows(TimeWindows[] time_windows) {
         this.time_windows = time_windows;
     }
 
