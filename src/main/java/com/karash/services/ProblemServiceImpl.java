@@ -6,18 +6,17 @@ import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.Skills;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
+import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.job.Shipment;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
+import com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
-import com.karash.DTO.ProblemDTO;
-import com.karash.DTO.Shipments;
-import com.karash.DTO.Vehicle_types;
-import com.karash.DTO.Vehicles;
+import com.karash.DTO.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -142,6 +141,21 @@ public class ProblemServiceImpl implements ProblemService {
         return skillBuilder.build();
     }
 
+    private List<Services> buildServices(ProblemDTO pojo){
+        List<Services> services = new ArrayList<>();
+        for (Services service : services) {
+            Service.Builder serviceBuilder = Service.Builder.newInstance("service=" + service.getId());
+            serviceBuilder.setName(service.getName());
+            serviceBuilder.setLocation(loc(service.getAddress().getLocationId(),
+                    service.getAddress().getLat(), service.getAddress().getLon()));
+            serviceBuilder.setServiceTime(service.getDuration());
+            for (TimeWindows tw : service.getTime_windows()) {
+                serviceBuilder.setTimeWindow(TimeWindow.newInstance(tw.getEarliest(), tw.getLatest()));
+            }
+        }
+        return services;
+    }
+
     private VehicleImpl.Builder createVehicle(Vehicles vehicles) {
         VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle");
         vehicleBuilder.setStartLocation(Location.newInstance(vehicles.getStartAddress().getLocationId()));
@@ -152,4 +166,5 @@ public class ProblemServiceImpl implements ProblemService {
         return Location.Builder.newInstance().setId(id)
                 .setCoordinate(Coordinate.newInstance(x, y)).build();
     }
+
 }

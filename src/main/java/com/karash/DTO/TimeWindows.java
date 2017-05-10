@@ -1,23 +1,23 @@
 package com.karash.DTO;
 
 public class TimeWindows {
-    private String earliest;
+    private double earliest;
 
-    private String latest;
+    private double latest;
 
-    public String getEarliest() {
+    public double getEarliest() {
         return earliest;
     }
 
-    public void setEarliest(String earliest) {
+    public void setEarliest(double earliest) {
         this.earliest = earliest;
     }
 
-    public String getLatest() {
+    public double getLatest() {
         return latest;
     }
 
-    public void setLatest(String latest) {
+    public void setLatest(double latest) {
         this.latest = latest;
     }
 
