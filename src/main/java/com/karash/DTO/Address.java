@@ -2,9 +2,9 @@ package com.karash.DTO;
 
 public class Address {
     private Double lon;
-    private Double lat;
     private String name;
-    private String locationId;
+    private Double lat;
+    private String location_id;
 
     public Double getLon() {
         return lon;
@@ -30,16 +30,16 @@ public class Address {
         this.lat = lat;
     }
 
-    public String getLocationId() {
-        return locationId;
+    public String getLocation_id() {
+        return location_id;
     }
 
-    public void setLocationId(String locationId) {
-        this.locationId = locationId;
+    public void setLocation_id(String location_id) {
+        this.location_id = location_id;
     }
 
     @Override
     public String toString() {
-        return "ClassPojo [lon = " + lon + ", name = " + name + ", lat = " + lat + ", locationId = " + locationId + "]";
+        return "ClassPojo [lon = " + lon + ", name = " + name + ", lat = " + lat + ", location_id = " + location_id + "]";
     }
 }

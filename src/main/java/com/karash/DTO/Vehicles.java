@@ -2,12 +2,12 @@ package com.karash.DTO;
 
 public class Vehicles {
     private String[] skills;
-    private String latestEnd;
-    private Start_address startAddress;
-    private Boolean returnToDepot;
-    private String vehicleId;
-    private String earliestStart;
-    private String typeId;
+    private String latest_end;
+    private Start_address start_address;
+    private Boolean return_to_depot;
+    private String vehicle_id;
+    private String earliest_start;
+    private String type_id;
 
     public String[] getSkills() {
         return skills;
@@ -17,56 +17,56 @@ public class Vehicles {
         this.skills = skills;
     }
 
-    public String getLatestEnd() {
-        return latestEnd;
+    public String getLatest_end() {
+        return latest_end;
     }
 
-    public void setLatestEnd(String latestEnd) {
-        this.latestEnd = latestEnd;
+    public void setLatest_end(String latest_end) {
+        this.latest_end = latest_end;
     }
 
-    public Start_address getStartAddress() {
-        return startAddress;
+    public Start_address getStart_address() {
+        return start_address;
     }
 
-    public void setStartAddress(Start_address startAddress) {
-        this.startAddress = startAddress;
+    public void setStart_address(Start_address start_address) {
+        this.start_address = start_address;
     }
 
-    public Boolean getReturnToDepot() {
-        return returnToDepot;
+    public Boolean getReturn_to_depot() {
+        return return_to_depot;
     }
 
-    public void setReturnToDepot(Boolean returnToDepot) {
-        this.returnToDepot = returnToDepot;
+    public void setReturn_to_depot(Boolean return_to_depot) {
+        this.return_to_depot = return_to_depot;
     }
 
-    public String getVehicleId() {
-        return vehicleId;
+    public String getVehicle_id() {
+        return vehicle_id;
     }
 
-    public void setVehicleId(String vehicleId) {
-        this.vehicleId = vehicleId;
+    public void setVehicle_id(String vehicle_id) {
+        this.vehicle_id = vehicle_id;
     }
 
-    public String getEarliestStart() {
-        return earliestStart;
+    public String getEarliest_start() {
+        return earliest_start;
     }
 
-    public void setEarliestStart(String earliestStart) {
-        this.earliestStart = earliestStart;
+    public void setEarliest_start(String earliest_start) {
+        this.earliest_start = earliest_start;
     }
 
-    public String getTypeId() {
-        return typeId;
+    public String getType_id() {
+        return type_id;
     }
 
-    public void setTypeId(String typeId) {
-        this.typeId = typeId;
+    public void setType_id(String type_id) {
+        this.type_id = type_id;
     }
 
     @Override
     public String toString() {
-        return "ClassPojo [skills = " + skills + ", latestEnd = " + latestEnd + ", startAddress = " + startAddress + ", returnToDepot = " + returnToDepot + ", vehicleId = " + vehicleId + ", earliestStart = " + earliestStart + ", typeId = " + typeId + "]";
+        return "ClassPojo [skills = " + skills + ", latest_end = " + latest_end + ", start_address = " + start_address + ", return_to_depot = " + return_to_depot + ", vehicle_id = " + vehicle_id + ", earliest_start = " + earliest_start + ", type_id = " + type_id + "]";
     }
 }

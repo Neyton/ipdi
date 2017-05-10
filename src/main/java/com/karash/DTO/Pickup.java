@@ -1,17 +1,17 @@
 package com.karash.DTO;
 
 public class Pickup {
-    private TimeWindows[] timeWindows;
+    private Time_windows[] timeWindows;
 
     private String duration;
 
     private Address address;
 
-    public TimeWindows[] getTimeWindows() {
+    public Time_windows[] getTimeWindows() {
         return timeWindows;
     }
 
-    public void setTimeWindows(TimeWindows[] timeWindows) {
+    public void setTimeWindows(Time_windows[] timeWindows) {
         this.timeWindows = timeWindows;
     }
 

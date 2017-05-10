@@ -2,13 +2,9 @@ package com.karash.DTO;
 
 public class ProblemDTO {
     private Vehicle_types[] vehicle_types;
-
     private Services[] services;
-
     private Shipments[] shipments;
-
     private Vehicles[] vehicles;
-
     private Object cost_matrices;
 
     public Object getCost_matrices() {

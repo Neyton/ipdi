@@ -2,9 +2,9 @@ package com.karash.DTO;
 
 public class Shipments {
     private String id;
-    private String[] requiredSkills;
+    private String[] required_skills;
     private Pickup pickup;
-    private String[] allowedVehicles;
+    private String[] allowed_vehicles;
     private String name;
     private Delivery delivery;
     private Integer[] size;
@@ -17,12 +17,12 @@ public class Shipments {
         this.id = id;
     }
 
-    public String[] getRequiredSkills() {
-        return requiredSkills;
+    public String[] getRequired_skills() {
+        return required_skills;
     }
 
-    public void setRequiredSkills(String[] requiredSkills) {
-        this.requiredSkills = requiredSkills;
+    public void setRequired_skills(String[] required_skills) {
+        this.required_skills = required_skills;
     }
 
     public Pickup getPickup() {
@@ -33,12 +33,12 @@ public class Shipments {
         this.pickup = pickup;
     }
 
-    public String[] getAllowedVehicles() {
-        return allowedVehicles;
+    public String[] getAllowed_vehicles() {
+        return allowed_vehicles;
     }
 
-    public void setAllowedVehicles(String[] allowedVehicles) {
-        this.allowedVehicles = allowedVehicles;
+    public void setAllowed_vehicles(String[] allowed_vehicles) {
+        this.allowed_vehicles = allowed_vehicles;
     }
 
     public String getName() {
@@ -67,6 +67,6 @@ public class Shipments {
 
     @Override
     public String toString() {
-        return "ClassPojo [id = " + id + ", requiredSkills = " + requiredSkills + ", pickup = " + pickup + ", allowedVehicles = " + allowedVehicles + ", name = " + name + ", delivery = " + delivery + ", size = " + size + "]";
+        return "ClassPojo [id = " + id + ", required_skills = " + required_skills + ", pickup = " + pickup + ", allowed_vehicles = " + allowed_vehicles + ", name = " + name + ", delivery = " + delivery + ", size = " + size + "]";
     }
 }

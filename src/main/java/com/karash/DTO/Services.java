@@ -5,7 +5,7 @@ public class Services {
 
     private String[] required_skills;
 
-    private TimeWindows[] time_windows;
+    private Time_windows[] time_windows;
 
     private String duration;
 
@@ -35,11 +35,11 @@ public class Services {
         this.required_skills = required_skills;
     }
 
-    public TimeWindows[] getTime_windows() {
+    public Time_windows[] getTime_windows() {
         return time_windows;
     }
 
-    public void setTime_windows(TimeWindows[] time_windows) {
+    public void setTime_windows(Time_windows[] time_windows) {
         this.time_windows = time_windows;
     }
 
