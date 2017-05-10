@@ -16,6 +16,7 @@ import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
 import com.karash.DTO.ProblemDTO;
 import com.karash.DTO.Shipments;
+import com.karash.DTO.TimeWindows;
 import com.karash.DTO.Vehicle_types;
 import com.karash.DTO.Vehicles;
 
@@ -92,15 +93,49 @@ public class ProblemServiceImpl implements ProblemService {
     private List<Shipment> buildShipments(ProblemDTO pojo) {
         List<Shipment> shipments = new ArrayList<>();
         for (Shipments shipment : pojo.getShipments()) {
-            Shipment shipment1 = Shipment.Builder.newInstance("shipment=" + shipment.getId()).addSizeDimension(0, 1)
-                    .setPickupLocation(loc(shipment.getPickup().getAddress().getLocationId(),
-                            shipment.getPickup().getAddress().getLat(), shipment.getPickup().getAddress().getLon()))
-                    .setDeliveryLocation(loc(shipment.getDelivery().getAddress().getLocationId(), shipment.getDelivery().getAddress().getLat(), shipment.getDelivery().getAddress().getLon()))
-                    .addPickupTimeWindow(Double.valueOf(shipment.getPickup().getTimeWindows()[0].getEarliest()), Double.valueOf(shipment.getPickup().getTimeWindows()[0].getLatest())).build();
-            shipments.add(shipment1);
+            Shipment.Builder shipmentBuilder = Shipment.Builder.newInstance("shipment=" + shipment.getId());
+            for (int i = 0; i < shipment.getSize().length; i++) {
+                shipmentBuilder.addSizeDimension(i, shipment.getSize()[i]);
+            }
+            setShipmentPickUpLocation(shipment, shipmentBuilder);
+            setShipmentDeliveryLocation(shipment, shipmentBuilder);
+            addPickupTimeWindow(shipment, shipmentBuilder);
+            addDeliveryTimeWindow(shipment, shipmentBuilder);
+
+            shipmentBuilder.setPickupServiceTime(Double.valueOf(shipment.getPickup().getDuration()));
+            shipmentBuilder.setDeliveryServiceTime(Double.valueOf(shipment.getDelivery().getDuration()));
+
+            for (String skill : shipment.getRequiredSkills()) {
+                shipmentBuilder.addRequiredSkill(skill);
+            }
+//            required_skills???
+//            allowed_vehicles???
+            shipments.add(shipmentBuilder.build());
         }
 
-        return null;
+        return shipments;
+    }
+
+    private void addDeliveryTimeWindow(Shipments shipment, Shipment.Builder shipmentBuilder) {
+        for (TimeWindows timeWindow : shipment.getDelivery().getTime_windows()) {
+            shipmentBuilder.addDeliveryTimeWindow(Double.valueOf(timeWindow.getEarliest()), Double.valueOf(timeWindow.getLatest()))
+        }
+    }
+
+    private void addPickupTimeWindow(Shipments shipment, Shipment.Builder shipmentBuilder) {
+        for (TimeWindows timeWindow : shipment.getPickup().getTimeWindows()) {
+            shipmentBuilder.addPickupTimeWindow(Double.valueOf(timeWindow.getEarliest()), Double.valueOf(timeWindow.getLatest()));
+        }
+    }
+
+    private Shipment.Builder setShipmentPickUpLocation(Shipments shipment, Shipment.Builder shipmentBuilder) {
+        return shipmentBuilder.setPickupLocation(loc(shipment.getPickup().getAddress().getLocationId(),
+                shipment.getPickup().getAddress().getLat(), shipment.getPickup().getAddress().getLon())).setName(shipment.getPickup().getAddress().getName());
+    }
+
+    private Shipment.Builder setShipmentDeliveryLocation(Shipments shipment, Shipment.Builder shipmentBuilder) {
+        return shipmentBuilder.setDeliveryLocation(loc(shipment.getDelivery().getAddress().getLocationId(),
+                shipment.getDelivery().getAddress().getLat(), shipment.getDelivery().getAddress().getLon())).setName(shipment.getDelivery().getAddress().getName());
     }
 
     private List<VehicleType> buildVehicleTypes(ProblemDTO pojo) {
@@ -135,18 +170,12 @@ public class ProblemServiceImpl implements ProblemService {
 
     private Skills buildSkills(String skills[]) {
         Skills.Builder skillBuilder = Skills.Builder.newInstance();
-
         for (String skill : skills) {
             skillBuilder.addSkill(skill);
         }
         return skillBuilder.build();
     }
 
-    private VehicleImpl.Builder createVehicle(Vehicles vehicles) {
-        VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle");
-        vehicleBuilder.setStartLocation(Location.newInstance(vehicles.getStartAddress().getLocationId()));
-        return vehicleBuilder;
-    }
 
     private Location loc(String id, Double x, Double y) {
         return Location.Builder.newInstance().setId(id)
