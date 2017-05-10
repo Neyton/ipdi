@@ -1,18 +1,16 @@
 package com.karash.DTO;
 
 public class Pickup {
-    private Time_windows[] timeWindows;
-
+    private Time_windows[] time_windows;
     private String duration;
-
     private Address address;
 
-    public Time_windows[] getTimeWindows() {
-        return timeWindows;
+    public Time_windows[] getTime_windows() {
+        return time_windows;
     }
 
-    public void setTimeWindows(Time_windows[] timeWindows) {
-        this.timeWindows = timeWindows;
+    public void setTime_windows(Time_windows[] time_windows) {
+        this.time_windows = time_windows;
     }
 
     public String getDuration() {
@@ -33,6 +31,6 @@ public class Pickup {
 
     @Override
     public String toString() {
-        return "ClassPojo [timeWindows = " + timeWindows + ", duration = " + duration + ", address = " + address + "]";
+        return "ClassPojo [time_windows = " + time_windows + ", duration = " + duration + ", address = " + address + "]";
     }
 }

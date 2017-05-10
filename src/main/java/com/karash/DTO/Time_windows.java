@@ -1,15 +1,15 @@
 package com.karash.DTO;
 
 public class Time_windows {
-    private String earliest;
+    private Double earliest;
 
     private Double latest;
 
-    public String getEarliest() {
+    public Double getEarliest() {
         return earliest;
     }
 
-    public void setEarliest(String earliest) {
+    public void setEarliest(Double earliest) {
         this.earliest = earliest;
     }
 

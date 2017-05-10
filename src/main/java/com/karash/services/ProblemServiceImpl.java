@@ -6,8 +6,10 @@ import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.Skills;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
 import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
+import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.job.Shipment;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
+import com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
@@ -15,6 +17,7 @@ import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
 import com.karash.DTO.ProblemDTO;
+import com.karash.DTO.Services;
 import com.karash.DTO.Shipments;
 import com.karash.DTO.Time_windows;
 import com.karash.DTO.Vehicle_types;
@@ -32,11 +35,10 @@ public class ProblemServiceImpl implements ProblemService {
     @Override
     public VehicleRoutingProblemSolution getSolution(ProblemDTO pojo) {
         VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-        List<VehicleImpl> vehicles = this.buildVehicles(pojo);
-        vehicles.forEach(v->vrpBuilder.addVehicle(v));
 
-        List<Shipment> shipments = this.buildShipments(pojo);
-        shipments.forEach(s->vrpBuilder.addJob(s));
+        this.buildVehicles(pojo).forEach(v -> vrpBuilder.addVehicle(v));
+        this.buildShipments(pojo).forEach(s -> vrpBuilder.addJob(s));
+        this.buildServices(pojo).forEach(s->vrpBuilder.addJob(s));
         vrpBuilder.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE);
 
         VehicleRoutingTransportCostsMatrix.Builder costMatrixBuilder = VehicleRoutingTransportCostsMatrix.Builder.newInstance(true);
@@ -55,12 +57,11 @@ public class ProblemServiceImpl implements ProblemService {
 
         Collection<VehicleRoutingProblemSolution> solutions = vra.searchSolutions();
         VehicleRoutingProblemSolution vehicleRoutingProblemSolution = Solutions.bestOf(solutions);
-        vehicleRoutingProblemSolution.getRoutes().stream().findFirst().orElse(null).getTourActivities().getActivities().forEach(t -> {
+        vehicleRoutingProblemSolution.getRoutes().stream().findAny().orElse(null).getTourActivities().getActivities().forEach(t -> {
             System.out.println("arrtime=" + new BigDecimal(t.getArrTime()).toPlainString());
             System.out.println("endtime=" + new BigDecimal(t.getEndTime()).toPlainString());
         });
-        return null;
-
+        return vehicleRoutingProblemSolution;
     }
 
     private List<Shipment> buildShipments(ProblemDTO pojo) {
@@ -96,7 +97,7 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     private void addPickupTimeWindow(Shipments shipment, Shipment.Builder shipmentBuilder) {
-        for (Time_windows timeWindow : shipment.getPickup().getTimeWindows()) {
+        for (Time_windows timeWindow : shipment.getPickup().getTime_windows()) {
             shipmentBuilder.addPickupTimeWindow(Double.valueOf(timeWindow.getEarliest()), Double.valueOf(timeWindow.getLatest()));
         }
     }
@@ -119,6 +120,7 @@ public class ProblemServiceImpl implements ProblemService {
                 vehicleTypeBuilder.addCapacityDimension(i, Integer.parseInt(vehicle.getCapacity()[i]));
             }
             vehicleTypeBuilder.setCostPerTime(2);
+            vehicleTypeBuilder.setProfile(vehicle.getProfile());
             vehicleTypes.add(vehicleTypeBuilder.build());
         }
         return vehicleTypes;
@@ -132,9 +134,10 @@ public class ProblemServiceImpl implements ProblemService {
             builder.setStartLocation(loc(vehicle.getStart_address().getLocationId(),
                     vehicle.getStart_address().getLat(), vehicle.getStart_address().getLon())).
                     setReturnToDepot(vehicle.getReturn_to_depot());
-            builder.setType(vehicleTypes.stream().filter(v -> v.getTypeId().equals(vehicle.getType_id())).findFirst().orElse(null));
+            builder.setType(vehicleTypes.stream().filter(v -> v.getProfile().equals(vehicle.getType_id())).findFirst().orElse(null));
             builder.setEarliestStart(Double.parseDouble(vehicle.getEarliest_start()));
-            builder.setLatestArrival(Double.parseDouble(vehicle.getLatest_end()));
+            if (Double.parseDouble(vehicle.getLatest_end()) > 0)
+                builder.setLatestArrival(Double.parseDouble(vehicle.getLatest_end()));
             builder.addSkills(buildSkills(vehicle.getSkills()));
             vehicles.add(builder.build());
         }
@@ -152,30 +155,32 @@ public class ProblemServiceImpl implements ProblemService {
 
     private VehicleImpl.Builder createVehicle(Vehicles vehicles) {
         VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle");
-        vehicleBuilder.setStartLocation(Location.newInstance(vehicles.getStartAddress().getLocationId()));
+        vehicleBuilder.setStartLocation(Location.newInstance(vehicles.getStart_address().getLocationId()));
         return vehicleBuilder;
     }
 
-    private List<Services> buildServices(ProblemDTO pojo){
-        List<Services> services = new ArrayList<>();
-        for (Services service : services) {
+    private List<Service> buildServices(ProblemDTO pojo) {
+        List<Service> services = new ArrayList<>();
+        for (Services service : pojo.getServices()) {
             Service.Builder serviceBuilder = Service.Builder.newInstance("service=" + service.getId());
             serviceBuilder.setName(service.getName());
-            serviceBuilder.setLocation(loc(service.getAddress().getLocationId(),
+            serviceBuilder.setLocation(loc(service.getAddress().getLocation_id(),
                     service.getAddress().getLat(), service.getAddress().getLon()));
             serviceBuilder.setServiceTime(service.getDuration());
-            for (TimeWindows tw : service.getTime_windows()) {
+            for (Time_windows tw : service.getTime_windows()) {
                 serviceBuilder.addTimeWindow(TimeWindow.newInstance(tw.getEarliest(), tw.getLatest()));
             }
-            for(String rs : service.getRequired_skills()) {
+            for (String rs : service.getRequired_skills()) {
                 serviceBuilder.addRequiredSkill(rs);
             }
             for (int i = 0; i < service.getSize().length; i++) {
                 serviceBuilder.addSizeDimension(i, Integer.valueOf(service.getSize()[i]));
             }
+            services.add(serviceBuilder.build());
         }
         return services;
     }
+
     private Location loc(String id, Double x, Double y) {
         return Location.Builder.newInstance().setId(id)
                 .setCoordinate(Coordinate.newInstance(x, y)).build();
