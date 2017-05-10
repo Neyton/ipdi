@@ -191,7 +191,10 @@ public class ProblemServiceImpl implements ProblemService {
                     service.getAddress().getLat(), service.getAddress().getLon()));
             serviceBuilder.setServiceTime(service.getDuration());
             for (TimeWindows tw : service.getTime_windows()) {
-                serviceBuilder.setTimeWindow(TimeWindow.newInstance(tw.getEarliest(), tw.getLatest()));
+                serviceBuilder.addTimeWindow(TimeWindow.newInstance(tw.getEarliest(), tw.getLatest()));
+            }
+            for(String s : service.getRequired_skills()) {
+                serviceBuilder.addRequiredSkill(s);
             }
         }
         return services;
