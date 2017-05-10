@@ -3,7 +3,7 @@ package com.karash.DTO;
 public class Time_windows {
     private String earliest;
 
-    private String latest;
+    private Double latest;
 
     public String getEarliest() {
         return earliest;
@@ -13,11 +13,11 @@ public class Time_windows {
         this.earliest = earliest;
     }
 
-    public String getLatest() {
+    public Double getLatest() {
         return latest;
     }
 
-    public void setLatest(String latest) {
+    public void setLatest(Double latest) {
         this.latest = latest;
     }
 

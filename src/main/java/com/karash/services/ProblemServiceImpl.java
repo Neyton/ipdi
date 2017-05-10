@@ -150,6 +150,32 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
 
+    private VehicleImpl.Builder createVehicle(Vehicles vehicles) {
+        VehicleImpl.Builder vehicleBuilder = VehicleImpl.Builder.newInstance("vehicle");
+        vehicleBuilder.setStartLocation(Location.newInstance(vehicles.getStartAddress().getLocationId()));
+        return vehicleBuilder;
+    }
+
+    private List<Services> buildServices(ProblemDTO pojo){
+        List<Services> services = new ArrayList<>();
+        for (Services service : services) {
+            Service.Builder serviceBuilder = Service.Builder.newInstance("service=" + service.getId());
+            serviceBuilder.setName(service.getName());
+            serviceBuilder.setLocation(loc(service.getAddress().getLocationId(),
+                    service.getAddress().getLat(), service.getAddress().getLon()));
+            serviceBuilder.setServiceTime(service.getDuration());
+            for (TimeWindows tw : service.getTime_windows()) {
+                serviceBuilder.addTimeWindow(TimeWindow.newInstance(tw.getEarliest(), tw.getLatest()));
+            }
+            for(String rs : service.getRequired_skills()) {
+                serviceBuilder.addRequiredSkill(rs);
+            }
+            for (int i = 0; i < service.getSize().length; i++) {
+                serviceBuilder.addSizeDimension(i, Integer.valueOf(service.getSize()[i]));
+            }
+        }
+        return services;
+    }
     private Location loc(String id, Double x, Double y) {
         return Location.Builder.newInstance().setId(id)
                 .setCoordinate(Coordinate.newInstance(x, y)).build();

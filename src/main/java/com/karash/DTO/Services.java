@@ -7,7 +7,7 @@ public class Services {
 
     private Time_windows[] time_windows;
 
-    private String duration;
+    private double duration;
 
     private String[] allowed_vehicles;
 
@@ -43,11 +43,11 @@ public class Services {
         this.time_windows = time_windows;
     }
 
-    public String getDuration() {
+    public double getDuration() {
         return duration;
     }
 
-    public void setDuration(String duration) {
+    public void setDuration(double duration) {
         this.duration = duration;
     }
 
