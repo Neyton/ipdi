@@ -2,21 +2,13 @@ package com.karash.DTO;
 
 public class Services {
     private String id;
-
     private String[] required_skills;
-
     private Time_windows[] time_windows;
-
     private double duration;
-
     private String[] allowed_vehicles;
-
     private Address address;
-
     private String name;
-
     private String type;
-
     private String[] size;
 
     public String getId() {

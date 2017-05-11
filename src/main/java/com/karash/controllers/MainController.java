@@ -1,10 +1,8 @@
 package com.karash.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
 import com.karash.DTO.ProblemDTO;
 import com.karash.services.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;

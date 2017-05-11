@@ -5,7 +5,6 @@ import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.Skills;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
-import com.graphhopper.jsprit.core.problem.cost.VehicleRoutingTransportCosts;
 import com.graphhopper.jsprit.core.problem.job.Service;
 import com.graphhopper.jsprit.core.problem.job.Shipment;
 import com.graphhopper.jsprit.core.problem.solution.VehicleRoutingProblemSolution;
@@ -23,7 +22,6 @@ import com.karash.DTO.Time_windows;
 import com.karash.DTO.Vehicle_types;
 import com.karash.DTO.Vehicles;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,8 +48,7 @@ public class ProblemServiceImpl implements ProblemService {
             costMatrixBuilder.addTransportTime(s, k, v);
         }));
 
-        VehicleRoutingTransportCosts costMatrix = costMatrixBuilder.build();
-
+        vrpBuilder.setRoutingCost(costMatrixBuilder.build());
 
         VehicleRoutingAlgorithm vra = Jsprit.createAlgorithm(vrpBuilder.build());
 
@@ -79,9 +76,8 @@ public class ProblemServiceImpl implements ProblemService {
                 for (String skill : shipment.getRequired_skills()) {
                     shipmentBuilder.addRequiredSkill(skill);
                 }
-//            allowed_vehicles???
-                for (String rs : shipment.getRequired_skills()) {
-                    shipmentBuilder.addRequiredSkill(rs);
+                for (String rs : shipment.getAllowed_vehicles()) {
+                    shipmentBuilder.addRequiredSkill("vehicle_" + rs);
                 }
                 shipments.add(shipmentBuilder.build());
             }
