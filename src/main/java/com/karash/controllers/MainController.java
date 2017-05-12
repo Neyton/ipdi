@@ -1,8 +1,6 @@
 package com.karash.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.karash.DTO.ProblemDTO;
 import com.karash.services.ProblemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,23 +19,19 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/api")
 public class MainController {
-
     @Autowired
     private ProblemService problemService;
+
+    @Autowired
+    private ObjectMapper mapper;
 
     @PostMapping
     @ResponseBody
     public String getData(@RequestBody ProblemDTO data) {
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(double.class, new MyDoubleSerializer());
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(module);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         try {
             return mapper.writeValueAsString(this.problemService.getSolution(data));
         } catch (IOException e) {
-            e.printStackTrace();
+            return e.getMessage();
         }
-        return "";
     }
 }

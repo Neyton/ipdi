@@ -2,6 +2,7 @@ package com.karash.services;
 
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
+import com.graphhopper.jsprit.core.algorithm.termination.VariationCoefficientTermination;
 import com.graphhopper.jsprit.core.problem.Location;
 import com.graphhopper.jsprit.core.problem.Skills;
 import com.graphhopper.jsprit.core.problem.VehicleRoutingProblem;
@@ -15,54 +16,53 @@ import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
-import com.karash.DTO.ProblemDTO;
-import com.karash.DTO.Services;
-import com.karash.DTO.Shipments;
-import com.karash.DTO.Time_windows;
-import com.karash.DTO.Vehicle_types;
-import com.karash.DTO.Vehicles;
+import com.karash.DTO.*;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @org.springframework.stereotype.Service
 public class ProblemServiceImpl implements ProblemService {
+    private Integer maxThreads;
 
     @Override
-    public VehicleRoutingProblemSolution getSolution(ProblemDTO pojo) {
+    public VehicleRoutingProblemSolution getSolution(ProblemDTO data) {
+        maxThreads = 2;
         VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
-
-        this.buildVehicles(pojo).forEach(v -> vrpBuilder.addVehicle(v));
-        this.buildShipments(pojo).forEach(s -> vrpBuilder.addJob(s));
-        this.buildServices(pojo).forEach(s -> vrpBuilder.addJob(s));
+        this.buildVehicles(data).forEach(v -> vrpBuilder.addVehicle(v));
+        this.buildShipments(data).forEach(s -> vrpBuilder.addJob(s));
+        this.buildServices(data).forEach(s -> vrpBuilder.addJob(s));
         vrpBuilder.setFleetSize(VehicleRoutingProblem.FleetSize.FINITE);
 
         VehicleRoutingTransportCostsMatrix.Builder costMatrixBuilder = VehicleRoutingTransportCostsMatrix.Builder.newInstance(true);
 
-        Map<String, Map<String, Integer>> cost_matrices = (Map<String, Map<String, Integer>>) pojo.getCost_matrices();
-
-
+        Map<String, Map<String, Integer>> cost_matrices = (Map<String, Map<String, Integer>>) data.getCost_matrices();
         cost_matrices.forEach((s, stringStringMap) -> stringStringMap.forEach((k, v) -> {
             costMatrixBuilder.addTransportTime(s, k, v);
         }));
-
         vrpBuilder.setRoutingCost(costMatrixBuilder.build());
-
-        VehicleRoutingAlgorithm vra = Jsprit.createAlgorithm(vrpBuilder.build());
-        vra.setMaxIterations(pojo.getMax_iterations());
-
-        Collection<VehicleRoutingProblemSolution> solutions = vra.searchSolutions();
-        VehicleRoutingProblemSolution vehicleRoutingProblemSolution = Solutions.bestOf(solutions);
-        return vehicleRoutingProblemSolution;
+        if (data.getMax_threads() != null) {
+            maxThreads = data.getMax_threads();
+        }
+        VehicleRoutingAlgorithm vra = Jsprit.Builder.newInstance(vrpBuilder.build()).setProperty(Jsprit.Parameter.THREADS, String.valueOf(maxThreads)).buildAlgorithm();
+        buildTerminate(vra, data);
+        vra.setMaxIterations(data.getMax_iterations());
+        return Solutions.bestOf(vra.searchSolutions());
     }
 
-    private List<Shipment> buildShipments(ProblemDTO pojo) {
-        List<Shipment> shipments = new ArrayList<>();
-        if (pojo.getShipments() != null) {
+    private void buildTerminate(VehicleRoutingAlgorithm vra, ProblemDTO data) {
+        if (data.getNoIterations() != null && data.getVariationCoefficientThreshold() != null) {
+            VariationCoefficientTermination termination = new VariationCoefficientTermination(data.getNoIterations(), data.getVariationCoefficientThreshold());
+            vra.setPrematureAlgorithmTermination(termination);
+            vra.addListener(termination);
+        }
+    }
 
-            for (Shipments shipment : pojo.getShipments()) {
+    private List<Shipment> buildShipments(ProblemDTO data) {
+        List<Shipment> shipments = new ArrayList<>();
+        if (data.getShipments() != null) {
+            for (Shipments shipment : data.getShipments()) {
                 Shipment.Builder shipmentBuilder = Shipment.Builder.newInstance(shipment.getId());
                 for (int i = 0; i < shipment.getSize().length; i++) {
                     shipmentBuilder.addSizeDimension(i, shipment.getSize()[i]);
@@ -86,31 +86,9 @@ public class ProblemServiceImpl implements ProblemService {
         return shipments;
     }
 
-    private void addDeliveryTimeWindow(Shipments shipment, Shipment.Builder shipmentBuilder) {
-        for (Time_windows timeWindow : shipment.getDelivery().getTime_windows()) {
-            shipmentBuilder.addDeliveryTimeWindow(Double.valueOf(timeWindow.getEarliest()), Double.valueOf(timeWindow.getLatest()));
-        }
-    }
-
-    private void addPickupTimeWindow(Shipments shipment, Shipment.Builder shipmentBuilder) {
-        for (Time_windows timeWindow : shipment.getPickup().getTime_windows()) {
-            shipmentBuilder.addPickupTimeWindow(Double.valueOf(timeWindow.getEarliest()), Double.valueOf(timeWindow.getLatest()));
-        }
-    }
-
-    private Shipment.Builder setShipmentPickUpLocation(Shipments shipment, Shipment.Builder shipmentBuilder) {
-        return shipmentBuilder.setPickupLocation(loc(shipment.getPickup().getAddress().getLocation_id(),
-                shipment.getPickup().getAddress().getLat(), shipment.getPickup().getAddress().getLon())).setName(shipment.getPickup().getAddress().getName());
-    }
-
-    private Shipment.Builder setShipmentDeliveryLocation(Shipments shipment, Shipment.Builder shipmentBuilder) {
-        return shipmentBuilder.setDeliveryLocation(loc(shipment.getDelivery().getAddress().getLocation_id(),
-                shipment.getDelivery().getAddress().getLat(), shipment.getDelivery().getAddress().getLon())).setName(shipment.getDelivery().getAddress().getName());
-    }
-
-    private List<VehicleType> buildVehicleTypes(ProblemDTO pojo) {
+    private List<VehicleType> buildVehicleTypes(ProblemDTO data) {
         List<VehicleType> vehicleTypes = new ArrayList<>();
-        for (Vehicle_types vehicle : pojo.getVehicle_types()) {
+        for (Vehicle_types vehicle : data.getVehicle_types()) {
             VehicleTypeImpl.Builder vehicleTypeBuilder = VehicleTypeImpl.Builder.newInstance(vehicle.getType_id());
             for (int i = 0; i < vehicle.getCapacity().length; i++) {
                 vehicleTypeBuilder.addCapacityDimension(i, Integer.parseInt(vehicle.getCapacity()[i]));
@@ -122,10 +100,10 @@ public class ProblemServiceImpl implements ProblemService {
         return vehicleTypes;
     }
 
-    private List<VehicleImpl> buildVehicles(ProblemDTO pojo) {
+    private List<VehicleImpl> buildVehicles(ProblemDTO data) {
         List<VehicleImpl> vehicles = new ArrayList<>();
-        List<VehicleType> vehicleTypes = this.buildVehicleTypes(pojo);
-        for (Vehicles vehicle : pojo.getVehicles()) {
+        List<VehicleType> vehicleTypes = this.buildVehicleTypes(data);
+        for (Vehicles vehicle : data.getVehicles()) {
             VehicleImpl.Builder builder = VehicleImpl.Builder.newInstance(vehicle.getVehicle_id());
             builder.setStartLocation(loc(vehicle.getStart_address().getLocation_id(),
                     vehicle.getStart_address().getLat(), vehicle.getStart_address().getLon())).
@@ -148,10 +126,9 @@ public class ProblemServiceImpl implements ProblemService {
         return skillBuilder.build();
     }
 
-
-    private List<Service> buildServices(ProblemDTO pojo) {
+    private List<Service> buildServices(ProblemDTO data) {
         List<Service> services = new ArrayList<>();
-        for (Services service : pojo.getServices()) {
+        for (Services service : data.getServices()) {
             Service.Builder serviceBuilder = Service.Builder.newInstance(service.getId());
             serviceBuilder.setName(service.getName());
             serviceBuilder.setLocation(loc(service.getAddress().getLocation_id(),
@@ -169,6 +146,28 @@ public class ProblemServiceImpl implements ProblemService {
             services.add(serviceBuilder.build());
         }
         return services;
+    }
+
+    private void addDeliveryTimeWindow(Shipments shipment, Shipment.Builder builder) {
+        for (Time_windows timeWindow : shipment.getDelivery().getTime_windows()) {
+            builder.addDeliveryTimeWindow(timeWindow.getEarliest(), timeWindow.getLatest());
+        }
+    }
+
+    private void addPickupTimeWindow(Shipments shipment, Shipment.Builder builder) {
+        for (Time_windows timeWindow : shipment.getPickup().getTime_windows()) {
+            builder.addPickupTimeWindow(timeWindow.getEarliest(), timeWindow.getLatest());
+        }
+    }
+
+    private Shipment.Builder setShipmentPickUpLocation(Shipments shipment, Shipment.Builder builder) {
+        return builder.setPickupLocation(loc(shipment.getPickup().getAddress().getLocation_id(),
+                shipment.getPickup().getAddress().getLat(), shipment.getPickup().getAddress().getLon())).setName(shipment.getPickup().getAddress().getName());
+    }
+
+    private Shipment.Builder setShipmentDeliveryLocation(Shipments shipment, Shipment.Builder builder) {
+        return builder.setDeliveryLocation(loc(shipment.getDelivery().getAddress().getLocation_id(),
+                shipment.getDelivery().getAddress().getLat(), shipment.getDelivery().getAddress().getLon())).setName(shipment.getDelivery().getAddress().getName());
     }
 
     private Location loc(String id, Double x, Double y) {

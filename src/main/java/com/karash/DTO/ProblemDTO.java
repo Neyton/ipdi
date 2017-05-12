@@ -7,6 +7,33 @@ public class ProblemDTO {
     private Vehicles[] vehicles;
     private Object cost_matrices;
     private Integer max_iterations;
+    private Integer max_threads;
+    private Integer noIterations;
+    private Double variationCoefficientThreshold;
+
+    public Integer getNoIterations() {
+        return noIterations;
+    }
+
+    public void setNoIterations(Integer noIterations) {
+        this.noIterations = noIterations;
+    }
+
+    public Double getVariationCoefficientThreshold() {
+        return variationCoefficientThreshold;
+    }
+
+    public void setVariationCoefficientThreshold(Double variationCoefficientThreshold) {
+        this.variationCoefficientThreshold = variationCoefficientThreshold;
+    }
+
+    public Integer getMax_threads() {
+        return max_threads;
+    }
+
+    public void setMax_threads(Integer max_threads) {
+        this.max_threads = max_threads;
+    }
 
     public Integer getMax_iterations() {
         return max_iterations;
