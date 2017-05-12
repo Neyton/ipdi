@@ -1,5 +1,7 @@
 package com.karash.services;
 
+import com.graphhopper.jsprit.analysis.toolbox.AlgorithmSearchProgressChartListener;
+import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.termination.VariationCoefficientTermination;
@@ -13,10 +15,16 @@ import com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
+import com.graphhopper.jsprit.core.reporting.SolutionPrinter;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
-import com.karash.DTO.*;
+import com.karash.DTO.ProblemDTO;
+import com.karash.DTO.Services;
+import com.karash.DTO.Shipments;
+import com.karash.DTO.Time_windows;
+import com.karash.DTO.Vehicle_types;
+import com.karash.DTO.Vehicles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +53,17 @@ public class ProblemServiceImpl implements ProblemService {
         if (data.getMax_threads() != null) {
             maxThreads = data.getMax_threads();
         }
-        VehicleRoutingAlgorithm vra = Jsprit.Builder.newInstance(vrpBuilder.build()).setProperty(Jsprit.Parameter.THREADS, String.valueOf(maxThreads)).buildAlgorithm();
+        VehicleRoutingProblem build = vrpBuilder.build();
+        VehicleRoutingAlgorithm vra = Jsprit.Builder.newInstance(build).setProperty(Jsprit.Parameter.THREADS, String.valueOf(maxThreads)).buildAlgorithm();
+        vra.getAlgorithmListeners().addListener(new AlgorithmSearchProgressChartListener("sol_progress.png"));
         buildTerminate(vra, data);
         vra.setMaxIterations(data.getMax_iterations());
-        return Solutions.bestOf(vra.searchSolutions());
+        VehicleRoutingProblemSolution solution = Solutions.bestOf(vra.searchSolutions());
+        SolutionPrinter.print(solution);
+        Plotter plotter = new Plotter(build, solution);
+        plotter.setLabel(Plotter.Label.SIZE);
+        plotter.plot("pd_solomon_r101_solution.png", "pd_r101");
+        return solution;
     }
 
     private void buildTerminate(VehicleRoutingAlgorithm vra, ProblemDTO data) {
