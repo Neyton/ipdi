@@ -2,7 +2,6 @@ package com.karash.DTO;
 
 public class Time_windows {
     private Double earliest;
-
     private Double latest;
 
     public Double getEarliest() {

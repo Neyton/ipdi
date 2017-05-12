@@ -51,6 +51,7 @@ public class ProblemServiceImpl implements ProblemService {
         vrpBuilder.setRoutingCost(costMatrixBuilder.build());
 
         VehicleRoutingAlgorithm vra = Jsprit.createAlgorithm(vrpBuilder.build());
+        vra.setMaxIterations(pojo.getMax_iterations());
 
         Collection<VehicleRoutingProblemSolution> solutions = vra.searchSolutions();
         VehicleRoutingProblemSolution vehicleRoutingProblemSolution = Solutions.bestOf(solutions);
@@ -126,7 +127,7 @@ public class ProblemServiceImpl implements ProblemService {
         List<VehicleType> vehicleTypes = this.buildVehicleTypes(pojo);
         for (Vehicles vehicle : pojo.getVehicles()) {
             VehicleImpl.Builder builder = VehicleImpl.Builder.newInstance(vehicle.getVehicle_id());
-            builder.setStartLocation(loc(vehicle.getStart_address().getLocationId(),
+            builder.setStartLocation(loc(vehicle.getStart_address().getLocation_id(),
                     vehicle.getStart_address().getLat(), vehicle.getStart_address().getLon())).
                     setReturnToDepot(vehicle.getReturn_to_depot());
             builder.setType(vehicleTypes.stream().filter(v -> v.getProfile().equals(vehicle.getType_id())).findFirst().orElse(null));
@@ -171,7 +172,6 @@ public class ProblemServiceImpl implements ProblemService {
     }
 
     private Location loc(String id, Double x, Double y) {
-        return Location.Builder.newInstance().setId(id)
-                .setCoordinate(Coordinate.newInstance(x, y)).build();
+        return Location.Builder.newInstance().setCoordinate(Coordinate.newInstance(x, y)).setId(id).build();
     }
 }

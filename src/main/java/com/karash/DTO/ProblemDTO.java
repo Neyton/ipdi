@@ -6,6 +6,15 @@ public class ProblemDTO {
     private Shipments[] shipments;
     private Vehicles[] vehicles;
     private Object cost_matrices;
+    private Integer max_iterations;
+
+    public Integer getMax_iterations() {
+        return max_iterations;
+    }
+
+    public void setMax_iterations(Integer max_iterations) {
+        this.max_iterations = max_iterations;
+    }
 
     public Object getCost_matrices() {
         return cost_matrices;
