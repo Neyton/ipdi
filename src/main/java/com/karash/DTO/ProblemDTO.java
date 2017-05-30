@@ -8,23 +8,23 @@ public class ProblemDTO {
     private Object cost_matrices;
     private Integer max_iterations;
     private Integer max_threads;
-    private Integer noIterations;
-    private Double variationCoefficientThreshold;
+    private Integer no_iterations;
+    private Double variation_coefficient_threshold;
 
-    public Integer getNoIterations() {
-        return noIterations;
+    public Integer getNo_iterations() {
+        return no_iterations;
     }
 
-    public void setNoIterations(Integer noIterations) {
-        this.noIterations = noIterations;
+    public void setNo_iterations(Integer no_iterations) {
+        this.no_iterations = no_iterations;
     }
 
-    public Double getVariationCoefficientThreshold() {
-        return variationCoefficientThreshold;
+    public Double getVariation_coefficient_threshold() {
+        return variation_coefficient_threshold;
     }
 
-    public void setVariationCoefficientThreshold(Double variationCoefficientThreshold) {
-        this.variationCoefficientThreshold = variationCoefficientThreshold;
+    public void setVariation_coefficient_threshold(Double variation_coefficient_threshold) {
+        this.variation_coefficient_threshold = variation_coefficient_threshold;
     }
 
     public Integer getMax_threads() {

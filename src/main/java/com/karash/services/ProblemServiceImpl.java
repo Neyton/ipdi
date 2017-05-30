@@ -1,7 +1,5 @@
 package com.karash.services;
 
-import com.graphhopper.jsprit.analysis.toolbox.AlgorithmSearchProgressChartListener;
-import com.graphhopper.jsprit.analysis.toolbox.Plotter;
 import com.graphhopper.jsprit.core.algorithm.VehicleRoutingAlgorithm;
 import com.graphhopper.jsprit.core.algorithm.box.Jsprit;
 import com.graphhopper.jsprit.core.algorithm.termination.VariationCoefficientTermination;
@@ -15,28 +13,36 @@ import com.graphhopper.jsprit.core.problem.solution.route.activity.TimeWindow;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleImpl;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleType;
 import com.graphhopper.jsprit.core.problem.vehicle.VehicleTypeImpl;
-import com.graphhopper.jsprit.core.reporting.SolutionPrinter;
 import com.graphhopper.jsprit.core.util.Coordinate;
 import com.graphhopper.jsprit.core.util.Solutions;
 import com.graphhopper.jsprit.core.util.VehicleRoutingTransportCostsMatrix;
-import com.karash.DTO.ProblemDTO;
-import com.karash.DTO.Services;
-import com.karash.DTO.Shipments;
-import com.karash.DTO.Time_windows;
-import com.karash.DTO.Vehicle_types;
-import com.karash.DTO.Vehicles;
+import com.karash.DTO.*;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @org.springframework.stereotype.Service
+@Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ProblemServiceImpl implements ProblemService {
+    @Value(value = "${max_threads}")
     private Integer maxThreads;
+
+    @Value(value = "${max_iterations}")
+    private Integer maxIterations;
+
+    @Value(value = "${variation_coefficient_threshold}")
+    private Double variationCoefficientThreshold;
+
+    @Value(value = "${no_iterations}")
+    private Integer noIterations;
+
 
     @Override
     public VehicleRoutingProblemSolution getSolution(ProblemDTO data) {
-        maxThreads = 2;
         VehicleRoutingProblem.Builder vrpBuilder = VehicleRoutingProblem.Builder.newInstance();
         this.buildVehicles(data).forEach(v -> vrpBuilder.addVehicle(v));
         this.buildShipments(data).forEach(s -> vrpBuilder.addJob(s));
@@ -55,23 +61,25 @@ public class ProblemServiceImpl implements ProblemService {
         }
         VehicleRoutingProblem build = vrpBuilder.build();
         VehicleRoutingAlgorithm vra = Jsprit.Builder.newInstance(build).setProperty(Jsprit.Parameter.THREADS, String.valueOf(maxThreads)).buildAlgorithm();
-        vra.getAlgorithmListeners().addListener(new AlgorithmSearchProgressChartListener("sol_progress.png"));
+
         buildTerminate(vra, data);
-        vra.setMaxIterations(data.getMax_iterations());
-        VehicleRoutingProblemSolution solution = Solutions.bestOf(vra.searchSolutions());
-        SolutionPrinter.print(solution);
-        Plotter plotter = new Plotter(build, solution);
-        plotter.setLabel(Plotter.Label.SIZE);
-        plotter.plot("pd_solomon_r101_solution.png", "pd_r101");
-        return solution;
+        if (data.getMax_iterations() != null) {
+            this.maxIterations = data.getMax_iterations();
+        }
+        vra.setMaxIterations(maxIterations);
+        return Solutions.bestOf(vra.searchSolutions());
     }
 
     private void buildTerminate(VehicleRoutingAlgorithm vra, ProblemDTO data) {
-        if (data.getNoIterations() != null && data.getVariationCoefficientThreshold() != null) {
-            VariationCoefficientTermination termination = new VariationCoefficientTermination(data.getNoIterations(), data.getVariationCoefficientThreshold());
-            vra.setPrematureAlgorithmTermination(termination);
-            vra.addListener(termination);
+        if (data.getNo_iterations() != null) {
+            this.noIterations = data.getNo_iterations();
         }
+        if (data.getVariation_coefficient_threshold() != null) {
+            this.variationCoefficientThreshold = data.getVariation_coefficient_threshold();
+        }
+        VariationCoefficientTermination termination = new VariationCoefficientTermination(this.noIterations, this.variationCoefficientThreshold);
+        vra.setPrematureAlgorithmTermination(termination);
+        vra.addListener(termination);
     }
 
     private List<Shipment> buildShipments(ProblemDTO data) {
@@ -108,7 +116,7 @@ public class ProblemServiceImpl implements ProblemService {
             for (int i = 0; i < vehicle.getCapacity().length; i++) {
                 vehicleTypeBuilder.addCapacityDimension(i, Integer.parseInt(vehicle.getCapacity()[i]));
             }
-            vehicleTypeBuilder.setCostPerTime(2);
+            vehicleTypeBuilder.setCostPerTime(1);
             vehicleTypeBuilder.setProfile(vehicle.getProfile());
             vehicleTypes.add(vehicleTypeBuilder.build());
         }
